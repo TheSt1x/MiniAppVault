@@ -1,0 +1,82 @@
+<svg class="penguin" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Тело (с градиентом для объема) -->
+  <ellipse cx="100" cy="120" rx="50" ry="70" fill="url(#body-gradient)"/>
+  
+  <!-- Живот (белый с легкой тенью) -->
+  <ellipse cx="100" cy="120" rx="30" ry="50" fill="white" filter="url(#soft-shadow)"/>
+  
+  <!-- Голова (с градиентом) -->
+  <circle cx="100" cy="70" r="40" fill="url(#head-gradient)"/>
+  
+  <!-- Глаза (с бликами) -->
+  <circle cx="80" cy="65" r="8" fill="white" stroke="#333" stroke-width="1.5"/>
+  <circle cx="120" cy="65" r="8" fill="white" stroke="#333" stroke-width="1.5"/>
+  <circle cx="78" cy="63" r="4" fill="#333"/>
+  <circle cx="118" cy="63" r="4" fill="#333"/>
+  <circle cx="77" cy="61" r="1.5" fill="white"/> <!-- Блик -->
+  <circle cx="117" cy="61" r="1.5" fill="white"/> <!-- Блик -->
+  
+  <!-- Клюв (ярко-оранжевый с градиентом) -->
+  <path d="M90 85 Q100 95 110 85" stroke="url(#beak-gradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+  
+  <!-- Лапы (с детализацией) -->
+  <path d="M80 180 Q85 170 90 180 Q95 190 100 185 Q105 190 110 180 Q115 170 120 180" fill="#FFA500" stroke="#E07C00" stroke-width="1.5"/>
+  
+  <!-- Крылья (с тенями) -->
+  <path d="M50 110 Q70 90 65 120 Q60 140 50 125" fill="url(#wing-gradient)"/>
+  <path d="M150 110 Q130 90 135 120 Q140 140 150 125" fill="url(#wing-gradient)"/>
+  
+  <!-- Шапка (с текстурой) -->
+  <rect x="70" y="25" width="60" height="15" rx="7" fill="#FF6B00" stroke="#D45A00" stroke-width="1.5"/>
+  <circle cx="100" cy="25" r="20" fill="#FF6B00" stroke="#D45A00" stroke-width="1.5"/>
+  <circle cx="65" cy="30" r="8" fill="#FF6B00" stroke="#D45A00" stroke-width="1.5"/>
+  <circle cx="135" cy="30" r="8" fill="#FF6B00" stroke="#D45A00" stroke-width="1.5"/>
+  
+  <!-- Полоски на шапке -->
+  <rect x="70" y="30" width="60" height="3" fill="#D45A00"/>
+  <rect x="70" y="35" width="60" height="2" fill="#FF8C00"/>
+  
+  <!-- Помпон (пушистый) -->
+  <circle cx="100" cy="15" r="6" fill="white" stroke="#DDD" stroke-width="1"/>
+  <circle cx="98" cy="13" r="1" fill="#FFF" filter="url(#glow)"/> <!-- Блеск -->
+  
+  <!-- Градиенты и эффекты -->
+  <defs>
+    <!-- Градиент для тела -->
+    <linearGradient id="body-gradient" x1="100" y1="50" x2="100" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#444"/>
+      <stop offset="100%" stop-color="#222"/>
+    </linearGradient>
+    
+    <!-- Градиент для головы -->
+    <linearGradient id="head-gradient" x1="100" y1="30" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#555"/>
+      <stop offset="100%" stop-color="#333"/>
+    </linearGradient>
+    
+    <!-- Градиент для клюва -->
+    <linearGradient id="beak-gradient" x1="90" y1="85" x2="110" y2="85" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFA500"/>
+      <stop offset="100%" stop-color="#FF6B00"/>
+    </linearGradient>
+    
+    <!-- Градиент для крыльев -->
+    <linearGradient id="wing-gradient" x1="50" y1="110" x2="150" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#333"/>
+      <stop offset="100%" stop-color="#555"/>
+    </linearGradient>
+    
+    <!-- Мягкая тень -->
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+      <feOffset dx="1" dy="2" result="offsetblur"/>
+      <feComposite in="SourceGraphic" in2="offsetblur" operator="over"/>
+    </filter>
+    
+    <!-- Блеск помпона -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+</svg>

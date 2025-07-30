@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Пингвин Кликер</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Montserrat:wght@500;600;700&display=swap');
+    
+    :root {
+      --bg-primary: #121826;
+      --bg-secondary: #1e2030;
+      --accent-blue: #6c8bff;
+      --accent-blue-dark: #5a6fd8;
+      --accent-orange: #ff9e64;
+      --accent-orange-dark: #e58a56;
+      --text-primary: #e0e5ff;
+      --text-secondary: #a2a8c3;
+      --penguin-body: #2b3245;
+      --penguin-belly: #f0f4ff;
+      --penguin-beak: var(--accent-orange);
+      --penguin-feet: var(--accent-orange);
+      --ice: #3a4a6b;
+      --ocean: #3a5a8a;
+      --shadow: rgba(0, 0, 0, 0.3);
+      --success-color: #6dde88;
+      --error-color: #ff6b6b;
+      --card-gradient: linear-gradient(145deg, #1f2335 0%, #191d2e 100%);
+      --glow-effect: 0 0 15px rgba(108, 139, 255, 0.3);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Montserrat', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 15px;
+      max-width: 500px;
+      margin: 0 auto;
+      background: radial-gradient(ellipse at top, var(--bg-primary) 0%, #0d0f18 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      background-attachment: fixed;
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+    
+    .container {
+      background: var(--card-gradient);
+      border-radius: 24px;
+      padding: 25px;
+      box-shadow: 0 12px 40px var(--shadow);
+      text-align: center;
+      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(108, 139, 255, 0.1);
+      margin-bottom: 20px;
+      backdrop-filter: blur(5px);
+    }
+    
+    .container::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(to right, var(--accent-blue), var(--accent-orange));
+      border-radius: 24px 24px 0 0;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      font-weight: 800;
+      font-size: 32px;
+      background: linear-gradient(to right, var(--accent-blue), var(--accent-orange));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 10px;
+      text-shadow: 0 2px 10px rgba(108, 139, 255, 0.3);
+      letter-spacing: -0.5px;
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 16px;
+      margin-bottom: 25px;
+      font-weight: 500;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      background: rgba(108, 139, 255, 0.1);
+      padding: 12px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border: 1px solid rgba(108, 139, 255, 0.2);
+      backdrop-filter: blur(5px);
+    }
+    
+    .user-info img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-blue);
+      box-shadow: 0 0 10px rgba(108, 139, 255, 0.3);
+    }
+    
+    .user-info .username {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text-primary);
+      letter-spacing: -0.3px;
+    }
+    
+    .user-info .status {
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .click-area {
+        margin: 25px 0 15px;
+        position: relative;
+        min-height: 220px;
+        display: flex;
+        justify-content: center;
+        cursor: pointer; 
+    }
+    
+    .penguin-container {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        transition: transform 0.2s;
+        z-index: 2;
+        padding: 0 40px; 
+        margin: 0 -40px; 
+    }
+    
+    .penguin-container::before {
+        content: "";
+        position: absolute;
+        top: -30px;
+        bottom: -30px;
+        left: 0;
+        right: 0;
+        z-index: -1;
+    }
+    
+    .penguin {
+      width: 180px;
+      height: 180px;
+      transition: all 0.3s;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+    }
+    
+    .penguin-container:active .penguin {
+      transform: scale(0.95);
+    }
+    
+    .ice-platform {
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+      height: 30px;
+      background: linear-gradient(to bottom, var(--ice), #2d3a5a);
+      border-radius: 50%;
+      z-index: 1;
+      box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    }
+    
+    .click-effect {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: radial-gradient(circle, rgba(108, 139, 255, 0.6) 0%, rgba(108, 139, 255, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: clickEffect 0.8s forwards;
+      z-index: 0;
+    }
+    
+    @keyframes clickEffect {
+      0% {
+        transform: scale(0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(3);
+        opacity: 0;
+      }
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin: 25px 0;
+      gap: 15px;
+    }
+    
+    .stat-box {
+      background: rgba(30, 32, 48, 0.6);
+      padding: 15px 10px;
+      border-radius: 16px;
+      flex: 1;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      border: 1px solid rgba(108, 139, 255, 0.1);
+      backdrop-filter: blur(5px);
+      transition: transform 0.3s;
+    }
+    
+    .stat-box:hover {
+      transform: translateY(-3px);
+    }
+    
+    .stat-box .label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    
+    .stat-box .value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--accent-blue);
+    }
+    
+    .button {
+      background: linear-gradient(to right, var(--accent-blue), var(--accent-blue-dark));
+      color: white;
+      border: none;
+      padding: 16px 20px;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 10px 0;
+      width: 100%;
+      max-width: 300px;
+      transition: all 0.3s;
+      box-shadow: var(--glow-effect);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(255,255,255,0.1), rgba(255,255,255,0));
+      z-index: -1;
+      transition: opacity 0.3s;
+    }
+    
+    .button:hover::before {
+      opacity: 0.5;
+    }
+    
+    .button::after {
+      content: "❄️";
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+    }
+    
+    .button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(108, 139, 255, 0.4);
+    }
+    
+    .button:active {
+      transform: translateY(0);
+    }
+    
+    .button:disabled {
+      background: linear-gradient(to right, #2a2e42, #232738);
+      color: var(--text-secondary);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .button.secondary {
+      background: linear-gradient(to right, var(--accent-orange), var(--accent-orange-dark));
+      box-shadow: 0 6px 15px rgba(255, 158, 100, 0.3);
+    }
+    
+    .button.secondary:hover {
+      box-shadow: 0 10px 20px rgba(255, 158, 100, 0.4);
+    }
+    
+    .button.secondary::after {
+      content: "🐟";
+    }
+    
+    .result-area {
+      margin-top: 25px;
+      padding: 15px;
+      background: rgba(108, 139, 255, 0.1);
+      border-radius: 14px;
+      font-size: 16px;
+      min-height: 24px;
+      transition: all 0.3s;
+      border: 1px solid rgba(108, 139, 255, 0.2);
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+    
+    .result-area.success {
+      background: rgba(109, 222, 136, 0.2);
+      color: var(--success-color);
+    }
+    
+    .result-area.error {
+      background: rgba(255, 107, 107, 0.2);
+      color: var(--error-color);
+    }
+    
+    .snowflake {
+      position: absolute;
+      color: #e1f5fe;
+      font-size: 20px;
+      pointer-events: none;
+      animation: fall linear forwards;
+      z-index: 0;
+    }
+    
+    @keyframes fall {
+      to {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    .level-up {
+      animation: levelUp 0.5s ease;
+    }
+    
+    @keyframes levelUp {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .fish-icon {
+      position: absolute;
+      width: 30px;
+      animation: swim 15s linear infinite;
+      opacity: 0.7;
+      z-index: 1;
+    }
+    
+    @keyframes swim {
+      0% { left: -30px; }
+      100% { left: 100%; }
+    }
+    
+    .bubble {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 50%;
+      animation: float linear infinite;
+      z-index: 0;
+    }
+    
+    @keyframes float {
+      to {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+    }
+    
+    .shop {
+      display: none;
+      margin-top: 20px;
+      background: var(--card-gradient);
+      border-radius: 24px;
+      padding: 25px;
+      box-shadow: 0 12px 40px var(--shadow);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(108, 139, 255, 0.1);
+      backdrop-filter: blur(5px);
+    }
+    
+    .shop::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(to right, var(--accent-orange), var(--accent-blue));
+      border-radius: 24px 24px 0 0;
+    }
+    
+    .shop-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .shop-header h2 {
+      margin-bottom: 0;
+    }
+    
+    .shop-header-icon {
+      background: linear-gradient(to right, var(--accent-orange), var(--accent-blue));
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 0 15px rgba(255, 158, 100, 0.3);
+    }
+    
+    .shop-item {
+      background: linear-gradient(145deg, #252a40, #1c1f32);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 15px;
+      border: 1px solid rgba(108, 139, 255, 0.15);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .shop-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(to right, var(--accent-orange), var(--accent-blue));
+    }
+    
+    .shop-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      border-color: rgba(108, 139, 255, 0.3);
+    }
+    
+    .shop-item-icon {
+      width: 50px;
+      height: 50px;
+      background: rgba(30, 32, 48, 0.7);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 15px;
+      font-size: 24px;
+      flex-shrink: 0;
+      border: 1px solid rgba(108, 139, 255, 0.2);
+    }
+    
+    .shop-item-content {
+      flex: 1;
+    }
+    
+    .shop-item-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .shop-item-title .tag {
+      background: linear-gradient(to right, var(--accent-orange), #ff7a45);
+      color: white;
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    
+    .shop-item-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    
+    .shop-item-price {
+      font-weight: 800;
+      color: var(--accent-orange);
+      margin-left: 15px;
+      white-space: nowrap;
+      font-size: 18px;
+      text-shadow: 0 0 8px rgba(255, 158, 100, 0.4);
+    }
+    
+    .shop-item-button {
+      background: linear-gradient(to right, var(--accent-orange), var(--accent-orange-dark));
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 15px;
+      min-width: 90px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(255, 158, 100, 0.2);
+    }
+    
+    .shop-item-button:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(255, 158, 100, 0.3);
+    }
+    
+    .shop-item-button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    .shop-item-button:disabled {
+      background: #2a2e42;
+      color: var(--text-secondary);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 15px;
+      gap: 10px;
+    }
+    
+    .tab-button {
+      padding: 10px 20px;
+      border-radius: 50px;
+      background: rgba(108, 139, 255, 0.1);
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-primary);
+    }
+    
+    .tab-button.active {
+      background: var(--accent-blue);
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .passive-income {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(30, 32, 48, 0.8);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 100;
+      border: 1px solid rgba(108, 139, 255, 0.2);
+      backdrop-filter: blur(5px);
+    }
+    
+    @keyframes floatText {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-50px); opacity: 0; text-shadow: 0 0 10px var(--accent-blue); }
+    }
+    
+    @media (max-width: 480px) {
+      .container, .shop {
+        padding: 20px 15px;
+        border-radius: 20px;
+      }
+      
+      h1 {
+        font-size: 28px;
+      }
+      
+      .penguin {
+        width: 160px;
+        height: 160px;
+      }
+      
+      .stat-box .value {
+        font-size: 20px;
+      }
+      
+      .button {
+        padding: 14px 15px;
+        font-size: 16px;
+      }
+      
+      .shop-item {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      .shop-item-price {
+        margin: 10px 0 0 0;
+      }
+      
+      .shop-item-button {
+        margin: 10px 0 0 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Пингвин Кликер</h1>
+    <div class="subtitle">Корми пингвина рыбками!</div>
+    
+    <div id="user-info" class="user-info">
+    </div>
+    
+    <div id="content-area">
+      <div class="click-area">
+        <img src="svg/fish-blue.svg" class="fish-icon" style="top: 20%; animation-delay: 0s; width: 28px;">
+        <img src="svg/fish-orange.svg" class="fish-icon" style="top: 60%; animation-delay: 3s; width: 22px;">
+        
+        <div class="penguin-container" id="penguin-container">
+          <img src="svg/penguin.svg" class="penguin" alt="Пингвин" />
+          <div class="ice-platform"></div>
+        </div>
+      </div>
+      
+      <div class="stats">
+        <div class="stat-box">
+          <div class="label">Собрано рыбы</div>
+          <div class="value" id="click-count">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="label">Уровень</div>
+          <div class="value" id="upgrade-level">1</div>
+        </div>
+      </div>
+      
+      <button id="buy-upgrade" class="button">
+        Улучшить удочку
+      </button>
+      
+      <button id="open-shop" class="button secondary">
+        Магазин улучшений
+      </button>
+    </div>
+    
+    <div id="result-area" class="result-area"></div>
+  </div>
+
+  <div id="shop" class="shop">
+    <div class="shop-header">
+      <div class="shop-header-icon">🐟</div>
+      <h2>Лавка рыбака</h2>
+    </div>
+    
+    <div class="tab-buttons">
+      <button class="tab-button active" data-tab="upgrades">Инструменты рыбака</button>
+      <button class="tab-button" data-tab="passive">Автоматизация</button>
+    </div>
+    
+    <div id="upgrades-tab" class="tab-content active">
+      <div class="shop-item">
+        <div class="shop-item-icon">🎣</div>
+        <div class="shop-item-content">
+          <div class="shop-item-title">
+            Улучшенная удочка
+            <span class="tag">ХИТ</span>
+          </div>
+          <div class="shop-item-desc">+1 рыба за каждый клик (накопительно)</div>
+        </div>
+        <div class="shop-item-price" id="rod-price">15</div>
+        <button class="shop-item-button" id="buy-rod">Купить</button>
+      </div>
+      
+      <div class="shop-item">
+        <div class="shop-item-icon">🤖</div>
+        <div class="shop-item-content">
+          <div class="shop-item-title">Автокликер</div>
+          <div class="shop-item-desc">Автоматические клики каждые 5 секунд</div>
+        </div>
+        <div class="shop-item-price" id="autoclicker-price">80</div>
+        <button class="shop-item-button" id="buy-autoclicker">Купить</button>
+      </div>
+      
+      <div class="shop-item">
+        <div class="shop-item-icon">✨</div>
+        <div class="shop-item-content">
+          <div class="shop-item-title">Удвоитель улова</div>
+          <div class="shop-item-desc">2x рыбы от всех источников</div>
+        </div>
+        <div class="shop-item-price" id="doubler-price">400</div>
+        <button class="shop-item-button" id="buy-doubler">Купить</button>
+      </div>
+      
+      <div class="shop-item">
+        <div class="shop-item-icon">🍀</div>
+        <div class="shop-item-content">
+          <div class="shop-item-title">Удача рыбака</div>
+          <div class="shop-item-desc">10% шанс получить 2-5x рыбы за клик</div>
+        </div>
+        <div class="shop-item-price" id="luck-price">300</div>
+        <button class="shop-item-button" id="buy-luck">Купить</button>
+      </div>
+    </div>
+    
+    <div id="passive-tab" class="tab-content">
+      <div class="shop-item">
+        <div class="shop-item-icon">🕸️</div>
+        <div class="shop-item-content">
+          <div class="shop-item-title">Рыболовная сеть</div>
+          <div class="shop-item-desc">+1 рыба каждые 10 секунд</div>
+        </div>
+        <div class="shop-item-price" id="net-price">35</div>
+        <button class="shop-item-button" id="buy-net">Купить</button>
+      </div>
+      
+      <div class="shop-item">
+        <div class="shop-item-icon">🏭</div>
+        <div class="shop-item-content">
+          <div class="shop-item-title">Рыбная ферма</div>
+          <div class="shop-item-desc">+5 рыбы каждые 10 секунд</div>
+        </div>
+        <div class="shop-item-price" id="farm-price">180</div>
+        <button class="shop-item-button" id="buy-farm">Купить</button>
+      </div>
+      
+      <div class="shop-item">
+        <div class="shop-item-icon">🏗️</div>
+        <div class="shop-item-content">
+          <div class="shop-item-title">Рыбный завод</div>
+          <div class="shop-item-desc">+25 рыбы каждые 10 секунд</div>
+        </div>
+        <div class="shop-item-price" id="factory-price">750</div>
+        <button class="shop-item-button" id="buy-factory">Купить</button>
+      </div>
+      
+      <div class="shop-item">
+        <div class="shop-item-icon">❄️</div>
+        <div class="shop-item-content">
+          <div class="shop-item-title">Ледобур</div>
+          <div class="shop-item-desc">+100 рыбы каждые 10 секунд</div>
+        </div>
+        <div class="shop-item-price" id="drill-price">600</div>
+        <button class="shop-item-button" id="buy-drill">Купить</button>
+      </div>
+    </div>
+    
+    <button id="close-shop" class="button" style="margin-top: 20px;">
+      Вернуться к игре
+    </button>
+  </div>
+  
+  <div id="passive-income" class="passive-income" style="display: none;">
+    Пассивный доход: <span id="passive-income-value">0</span> рыбы/10сек
+  </div>
+
+  <script>
+    const webApp = Telegram.WebApp;
+    webApp.ready();
+    webApp.expand();
+    
+    const gameState = {
+      clicks: 0,
+      upgradeLevel: 1,
+      upgradeCost: 15,
+      rodLevel: 1,
+      autoclicker: false,
+      doubler: false,
+      luck: false,
+      net: 0,
+      farm: 0,
+      factory: 0,
+      iceDrill: false,
+      lastPassiveIncome: 0,
+      lastAutoclick: 0
+    };
+    
+    const userInfoDiv = document.getElementById('user-info');
+    const penguinContainer = document.getElementById('penguin-container');
+    const clickCountDiv = document.getElementById('click-count');
+    const upgradeLevelDiv = document.getElementById('upgrade-level');
+    const buyUpgradeButton = document.getElementById('buy-upgrade');
+    const resultAreaDiv = document.getElementById('result-area');
+    const openShopButton = document.getElementById('open-shop');
+    const closeShopButton = document.getElementById('close-shop');
+    const shopDiv = document.getElementById('shop');
+    const passiveIncomeDiv = document.getElementById('passive-income');
+    const passiveIncomeValue = document.getElementById('passive-income-value');
+    
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    const prices = {
+      rod: level => Math.floor(15 * Math.pow(1.5, level - 1)),
+      autoclicker: 80,
+      doubler: 400,
+      luck: 300,
+      net: 35,
+      farm: 180,
+      factory: 750,
+      iceDrill: 600
+    };
+    
+    function initUserInfo() {
+      const user = webApp.initDataUnsafe.user;
+      if (user) {
+        userInfoDiv.innerHTML = `
+          <img src="${user.photo_url}" alt="User Photo">
+          <div>
+            <div class="username">${user.first_name || 'Игрок'}</div>
+            <div class="status">🐧 Собирает рыбу</div>
+          </div>
+        `;
+      } else {
+        userInfoDiv.innerHTML = `
+          <div>
+            <div class="username">Игрок</div>
+            <div class="status">🐧 Собирает рыбу</div>
+          </div>
+        `;
+      }
+    }
+    
+    function updateUI() {
+      clickCountDiv.textContent = gameState.clicks;
+      upgradeLevelDiv.textContent = gameState.upgradeLevel;
+      buyUpgradeButton.innerHTML = `Улучшить удочку (${gameState.upgradeCost} рыбы)`;
+      
+      buyUpgradeButton.disabled = gameState.clicks < gameState.upgradeCost;
+      document.getElementById('buy-rod').disabled = gameState.clicks < prices.rod(gameState.rodLevel);
+      document.getElementById('buy-autoclicker').disabled = gameState.autoclicker || gameState.clicks < prices.autoclicker;
+      document.getElementById('buy-doubler').disabled = gameState.doubler || gameState.clicks < prices.doubler;
+      document.getElementById('buy-luck').disabled = gameState.luck || gameState.clicks < prices.luck;
+      document.getElementById('buy-net').disabled = gameState.clicks < prices.net;
+      document.getElementById('buy-farm').disabled = gameState.clicks < prices.farm;
+      document.getElementById('buy-factory').disabled = gameState.clicks < prices.factory;
+      document.getElementById('buy-drill').disabled = gameState.iceDrill || gameState.clicks < prices.iceDrill;
+      
+      document.getElementById('rod-price').textContent = prices.rod(gameState.rodLevel);
+      document.getElementById('autoclicker-price').textContent = prices.autoclicker;
+      document.getElementById('doubler-price').textContent = prices.doubler;
+      document.getElementById('luck-price').textContent = prices.luck;
+      document.getElementById('net-price').textContent = prices.net;
+      document.getElementById('farm-price').textContent = prices.farm;
+      document.getElementById('factory-price').textContent = prices.factory;
+      document.getElementById('drill-price').textContent = prices.iceDrill;
+      
+      const passiveIncome = gameState.net * 1 + gameState.farm * 5 + gameState.factory * 25 + (gameState.iceDrill ? 100 : 0);
+      passiveIncomeValue.textContent = passiveIncome;
+      
+      if (passiveIncome > 0) {
+        passiveIncomeDiv.style.display = 'block';
+      } else {
+        passiveIncomeDiv.style.display = 'none';
+      }
+      
+      upgradeLevelDiv.parentElement.classList.add('level-up');
+      setTimeout(() => {
+        upgradeLevelDiv.parentElement.classList.remove('level-up');
+      }, 500);
+    }
+    
+    function createClickEffect(x, y) {
+      const effect = document.createElement('div');
+      effect.classList.add('click-effect');
+      effect.style.left = `${x}px`;
+      effect.style.top = `${y}px`;
+      document.querySelector('.click-area').appendChild(effect);
+      
+      setTimeout(() => {
+        effect.remove();
+      }, 800);
+    }
+    
+    function addFish(amount) {
+      let finalAmount = amount;
+      
+      if (gameState.doubler) {
+        finalAmount *= 2;
+      }
+      
+      gameState.clicks += finalAmount;
+      updateUI();
+      return finalAmount;
+    }
+    
+    document.querySelector('.click-area').addEventListener('click', (e) => {
+      const rect = document.querySelector('.penguin-container').getBoundingClientRect();
+      const x = e.clientX - rect.left - 40; 
+      const y = e.clientY - rect.top;
+      
+      createClickEffect(x, y);
+      
+      let added = gameState.upgradeLevel;
+      
+      if (gameState.luck && Math.random() < 0.1) {
+        const multiplier = 2 + Math.floor(Math.random() * 4); 
+        added *= multiplier;
+        showFloatingText(`🍀 +${added}`, x, y);
+      } else {
+        showFloatingText(`+${added}`, x, y);
+      }
+      
+      addFish(added);
+      
+      document.querySelector('.penguin-container').style.transform = 'scale(0.95)';
+      setTimeout(() => {
+          document.querySelector('.penguin-container').style.transform = 'scale(1)';
+      }, 200);
+    });
+    
+    function showFloatingText(text, x, y) {
+      const floatingText = document.createElement('div');
+      floatingText.textContent = text;
+      floatingText.style.position = 'absolute';
+      floatingText.style.left = `${x}px`;
+      floatingText.style.top = `${y}px`;
+      floatingText.style.color = '#1e88e5';
+      floatingText.style.fontWeight = 'bold';
+      floatingText.style.fontSize = '20px';
+      floatingText.style.pointerEvents = 'none';
+      floatingText.style.zIndex = '10';
+      floatingText.style.textShadow = '0 2px 4px rgba(0,0,0,0.2)';
+      floatingText.style.animation = 'floatText 1s forwards';
+      
+      document.querySelector('.click-area').appendChild(floatingText);
+      
+      setTimeout(() => {
+        floatingText.remove();
+      }, 1000);
+    }
+    
+    buyUpgradeButton.addEventListener('click', () => {
+      if (gameState.clicks >= gameState.upgradeCost) {
+        gameState.clicks -= gameState.upgradeCost;
+        gameState.upgradeLevel += 1;
+        gameState.upgradeCost = Math.floor(gameState.upgradeCost * 1.5);
+        
+        showResult(`🎣 Уровень ${gameState.upgradeLevel}! Теперь за клик: ${gameState.upgradeLevel} рыбы`, 'success');
+        updateUI();
+      }
+    });
+    
+    openShopButton.addEventListener('click', () => {
+      document.getElementById('content-area').style.display = 'none';
+      shopDiv.style.display = 'block';
+    });
+    
+    closeShopButton.addEventListener('click', () => {
+      shopDiv.style.display = 'none';
+      document.getElementById('content-area').style.display = 'block';
+    });
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tabId = button.dataset.tab;
+        
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        button.classList.add('active');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+      });
+    });
+    
+    document.getElementById('buy-rod').addEventListener('click', () => {
+      const cost = prices.rod(gameState.rodLevel);
+      if (gameState.clicks >= cost) {
+        gameState.clicks -= cost;
+        gameState.rodLevel += 1;
+        gameState.upgradeLevel += 1;
+        gameState.upgradeCost = prices.rod(gameState.rodLevel);
+        
+        showResult(`🎣 Улучшена удочка! Уровень: ${gameState.rodLevel}`, 'success');
+        updateUI();
+      }
+    });
+    
+    document.getElementById('buy-autoclicker').addEventListener('click', () => {
+      if (!gameState.autoclicker && gameState.clicks >= prices.autoclicker) {
+        gameState.clicks -= prices.autoclicker;
+        gameState.autoclicker = true;
+        
+        showResult(`🤖 Автокликер куплен! Теперь пингвин кликает сам каждые 5 сек`, 'success');
+        updateUI();
+      }
+    });
+    
+    document.getElementById('buy-doubler').addEventListener('click', () => {
+      if (!gameState.doubler && gameState.clicks >= prices.doubler) {
+        gameState.clicks -= prices.doubler;
+        gameState.doubler = true;
+        
+        showResult(`✨ Удвоитель куплен! Весь доход теперь удваивается`, 'success');
+        updateUI();
+      }
+    });
+    
+    document.getElementById('buy-luck').addEventListener('click', () => {
+      if (!gameState.luck && gameState.clicks >= prices.luck) {
+        gameState.clicks -= prices.luck;
+        gameState.luck = true;
+        
+        showResult(`🍀 Удача рыбака! Теперь есть шанс получить больше рыбы`, 'success');
+        updateUI();
+      }
+    });
+    
+    document.getElementById('buy-net').addEventListener('click', () => {
+      if (gameState.clicks >= prices.net) {
+        gameState.clicks -= prices.net;
+        gameState.net += 1;
+        
+        showResult(`🕸️ Куплена рыболовная сеть! +1 рыба каждые 10 сек`, 'success');
+        updateUI();
+      }
+    });
+    
+    document.getElementById('buy-farm').addEventListener('click', () => {
+      if (gameState.clicks >= prices.farm) {
+        gameState.clicks -= prices.farm;
+        gameState.farm += 1;
+        
+        showResult(`🏭 Куплена рыбная ферма! +5 рыбы каждые 10 сек`, 'success');
+        updateUI();
+      }
+    });
+    
+    document.getElementById('buy-factory').addEventListener('click', () => {
+      if (gameState.clicks >= prices.factory) {
+        gameState.clicks -= prices.factory;
+        gameState.factory += 1;
+        
+        showResult(`🏗️ Куплен рыбный завод! +25 рыбы каждые 10 сек`, 'success');
+        updateUI();
+      }
+    });
+    
+    document.getElementById('buy-drill').addEventListener('click', () => {
+      if (!gameState.iceDrill && gameState.clicks >= prices.iceDrill) {
+        gameState.clicks -= prices.iceDrill;
+        gameState.iceDrill = true;
+        
+        showResult(`❄️ Куплен ледобур! +100 рыбы каждые 10 сек`, 'success');
+        updateUI();
+      }
+    });
+    
+    function showResult(message, type = '') {
+      resultAreaDiv.textContent = message;
+      resultAreaDiv.className = 'result-area';
+      
+      if (type) {
+        resultAreaDiv.classList.add(type);
+      }
+      
+      setTimeout(() => {
+        resultAreaDiv.textContent = '';
+        resultAreaDiv.className = 'result-area';
+      }, 3000);
+    }
+    
+    function passiveIncome() {
+      const now = Date.now();
+      const passiveIncome = gameState.net * 1 + gameState.farm * 5 + gameState.factory * 25 + (gameState.iceDrill ? 100 : 0);
+      
+      if (passiveIncome > 0 && now - gameState.lastPassiveIncome >= 10000) {
+        const added = addFish(passiveIncome);
+        showFloatingText(`+${added}`, 100, 150);
+        gameState.lastPassiveIncome = now;
+      }
+      
+      if (gameState.autoclicker && now - gameState.lastAutoclick >= 5000) {
+        const added = addFish(gameState.upgradeLevel);
+        showFloatingText(`🤖 +${added}`, 100, 100);
+        gameState.lastAutoclick = now;
+        
+        penguinContainer.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          penguinContainer.style.transform = 'scale(1)';
+        }, 200);
+      }
+      
+      requestAnimationFrame(passiveIncome);
+    }
+    
+    initUserInfo();
+    updateUI();
+    passiveIncome();
+    
+    webApp.onEvent('themeChanged', updateTheme);
+    function updateTheme() {
+      const theme = webApp.themeParams;
+      document.documentElement.style.setProperty('--bg-primary', theme.bg_color || '#e6f7ff');
+      document.documentElement.style.setProperty('--bg-secondary', theme.secondary_bg_color || '#ffffff');
+      document.documentElement.style.setProperty('--text-primary', theme.text_color || '#0d47a1');
+      document.documentElement.style.setProperty('--text-secondary', theme.hint_color || '#546e7a');
+      document.documentElement.style.setProperty('--accent-blue', theme.button_color || '#1e88e5');
+    }
+    
+    updateTheme();
+    
+    document.addEventListener('touchmove', function(e) {
+      if (e.scale !== 1) { e.preventDefault(); }
+    }, { passive: false });
+    
+    document.body.style.overflow = 'hidden';
+    document.body.style.height = '100%';
+  </script>
+</body>
+</html>
